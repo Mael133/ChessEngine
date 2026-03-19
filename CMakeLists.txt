@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(ChessEngine
     src/main.cpp
-    src/Board.cpp
-    src/MoveGenerator.cpp
+    src/board.cpp
+    src/moveGenerator.cpp
 )
 
 target_include_directories(ChessEngine PRIVATE ${CMAKE_SOURCE_DIR}/include)
