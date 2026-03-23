@@ -29,7 +29,7 @@ bitboard Board::allPieces(){
             bitboards[wq] | bitboards[bq]|
             bitboards[wk] | bitboards[bk];
 }
-bitboard Board::allPieces(int color){\
+bitboard Board::allPieces(int color){
     bool offset = (color == white);
     return bitboards[bp-(offset*6)] | bitboards[br-(offset*6)]|
             bitboards[bn-(offset*6)] | bitboards[bb-(offset*6)]|

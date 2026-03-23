@@ -42,7 +42,8 @@ void generatePawnMoves(std::vector<Move>& moves, Board& board){
             } 
         }//double push
 
-        if (((board.sideToMove == white) && (currentPosition.col != 0)) || ((board.sideToMove == black) && (currentPosition.col != 7))){//right capture
+        if (((board.sideToMove == white) && (currentPosition.col != 0)) ||
+            ((board.sideToMove == black) && (currentPosition.col != 7))){//right capture
             if(board.hasPieceAt(i+(7*direction), oponnent)){
                 Move move = addMove(moves, board, i, i+(7*direction));
                 if (board.showPawnMoves){
@@ -52,7 +53,8 @@ void generatePawnMoves(std::vector<Move>& moves, Board& board){
             }
         }//right capture
 
-        if (((board.sideToMove == white) && (currentPosition.col != 7)) || ((board.sideToMove == black) && (currentPosition.col != 0))){//left capture
+        if (((board.sideToMove == white) && (currentPosition.col != 7)) ||
+            ((board.sideToMove == black) && (currentPosition.col != 0))){//left capture
             if(board.hasPieceAt(i+(9*direction), oponnent)){
                 Move move = addMove(moves, board, i, i+(9*direction));
                 if (board.showPawnMoves){
