@@ -1,5 +1,4 @@
 #include "board.hpp"
-#include "position.hpp"
 #include "move.hpp"
 
 Board::Board(){

@@ -7,14 +7,18 @@ int main(){
     Board board;
 
 
-    board.sideToMove = black;
+    //board.sideToMove = black;
 
-    /*
+    
     board.showQueenMoves = true;
     board.showKnightMoves = true;
     board.showPawnMoves = true;
     board.showKingMoves = true;
-    */
+    board.showBishopMoves = true;
+    board.showRookMoves = true;
+    
+
+    /*
     board.bitboards[br] = 0x1400000000000000;
     board.bitboards[bq] = 0x20000000000000;
     board.bitboards[bb] = 0x8000000000000;
@@ -27,8 +31,7 @@ int main(){
     board.bitboards[wn] = 0x20000;
     board.bitboards[wb] = 0x200;
     board.bitboards[wk] = 0x2;
-
-
+    */
 
     generateMoves(moves, board);
 

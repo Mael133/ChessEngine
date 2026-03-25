@@ -2,14 +2,16 @@
 #include "types.hpp"
 #include "move.hpp"
 
+int getSquareCol(int square){return square % 8;}
+int getSquareRow(int row){return row / 8;}
+
 Move addMove(std::vector<Move>& moves, Board& board, int startPosition, int targetPosition){
     int oponnent = white;
     if(board.sideToMove == white) oponnent = black;
     
-    Move move;
-    move.isCapture = board.hasPieceAt(targetPosition, oponnent);
-    move.startPosition = Position(startPosition);
-    move.targetPosition = Position(targetPosition);
+    Move move(startPosition, targetPosition);
+    if(board.hasPieceAt(targetPosition, oponnent)) move.setCapture();
+    else move.resetCapture();
     moves.push_back(move);
     return move;
 }
@@ -26,40 +28,38 @@ void generatePawnMoves(std::vector<Move>& moves, Board& board){
     }
 
     for(int i = 8; i < 56; i++){
-        Position currentPosition(i);
-
         if(((1ULL<<i)&pawns) == 0) continue;
 
         if(!board.hasPieceAt(i+(8*direction))){//push
             Move move = addMove(moves, board, i, i+(8*direction));
-            if (board.showPawnMoves) board.legalMove.push_back(move.targetPosition.getSquare());
+            if (board.showPawnMoves) board.legalMove.push_back(move.to());
         }//push
 
         if(((i>7)&&(i<16)&&(direction==1)) || ((i>47)&&(i<56)&&(direction==-1))){//double push
             if(!board.hasPieceAt(i+(16*direction)) && !board.hasPieceAt(i+(8*direction))){
                 Move move = addMove(moves, board, i, i+(16*direction));
-                if (board.showPawnMoves) board.legalMove.push_back(move.targetPosition.getSquare());
+                if (board.showPawnMoves) board.legalMove.push_back(move.to());
             } 
         }//double push
 
-        if (((board.sideToMove == white) && (currentPosition.col != 0)) ||
-            ((board.sideToMove == black) && (currentPosition.col != 7))){//right capture
+        if (((board.sideToMove == white) && (getSquareCol(i) != 0)) ||
+            ((board.sideToMove == black) && (getSquareCol(i) != 7))){//right capture
             if(board.hasPieceAt(i+(7*direction), oponnent)){
                 Move move = addMove(moves, board, i, i+(7*direction));
                 if (board.showPawnMoves){
-                    board.legalMove.push_back(move.targetPosition.getSquare());
-                    board.targetFromCarpture.push_back(move.targetPosition.getSquare());
+                    board.legalMove.push_back(move.to());
+                    board.targetFromCarpture.push_back(move.to());
                 }
             }
         }//right capture
 
-        if (((board.sideToMove == white) && (currentPosition.col != 7)) ||
-            ((board.sideToMove == black) && (currentPosition.col != 0))){//left capture
+        if (((board.sideToMove == white) && (getSquareCol(i) != 7)) ||
+            ((board.sideToMove == black) && (getSquareCol(i) != 0))){//left capture
             if(board.hasPieceAt(i+(9*direction), oponnent)){
                 Move move = addMove(moves, board, i, i+(9*direction));
                 if (board.showPawnMoves){
-                    board.legalMove.push_back(move.targetPosition.getSquare());
-                    board.targetFromCarpture.push_back(move.targetPosition.getSquare());
+                    board.legalMove.push_back(move.to());
+                    board.targetFromCarpture.push_back(move.to());
                 }
             }
         }//left capture
@@ -82,10 +82,8 @@ void generateKnightMoves(std::vector<Move>& moves, Board& board){
     for(int i = 0; i < 64; i ++){
         if(((1ULL<<i)&knights) == 0) continue;
 
-        Position currentPosition(i);
-
         for(int * attack : attacks){
-            if(((attack[col] + currentPosition.col) > 7) || ((attack[col] + currentPosition.col) < 0)) continue;
+            if(((attack[col] + getSquareCol(i)) > 7) || ((attack[col] + getSquareCol(i)) < 0)) continue;
 
             int attackedSquare = i+(attack[col]+(attack[row]*8));
             if ((attackedSquare > 63) || (attackedSquare < 0)) continue;
@@ -94,7 +92,7 @@ void generateKnightMoves(std::vector<Move>& moves, Board& board){
             Move move = addMove(moves, board, i, attackedSquare);
 
             if (!board.showKnightMoves) continue;
-            if (move.isCapture) board.targetFromCarpture.push_back(attackedSquare);
+            if (move.isCapture()) board.targetFromCarpture.push_back(attackedSquare);
             board.legalMove.push_back(attackedSquare);
         }
     }
@@ -106,16 +104,15 @@ void generateKingMoves(std::vector<Move>& moves, Board& board){
     
     for(int i = 0; i < 64; i++){
         if(((1ULL<<i)&kings) == 0) continue;
-        Position currentPosition(i);
         
         for(int direction : {1, -1, 8, -8, 7, -7, 9, -9}){
             int attackedSquare = i+direction;
-            if(std::abs(currentPosition.col-(attackedSquare%8)) > 1) continue;
+            if(std::abs(getSquareCol(i)-(attackedSquare%8)) > 1) continue;
             if ((attackedSquare > 63) || (attackedSquare < 0)) continue;
             if(!board.hasPieceAt(attackedSquare, board.sideToMove)){
                 Move move = addMove(moves, board, i, attackedSquare);
                 if (board.showKingMoves){
-                    if (move.isCapture){
+                    if (move.isCapture()){
                         board.targetFromCarpture.push_back(attackedSquare);
                     }else{
                         board.legalMove.push_back(attackedSquare);
@@ -133,24 +130,23 @@ void generateSlidingnMoves(std::vector<Move>& moves, Board& board, bitboard piec
 
     for(int i = 0; i < 64; i++){
         if(((1ULL<<i)&pieces) == 0) continue;
-        Position currentPosition(i);
         
         for(int direction : directions){
             int attackedSquare = i+direction;
-            if(std::abs(currentPosition.col-(attackedSquare%8)) > 1) continue;
+            if(std::abs(getSquareCol(i)-(attackedSquare%8)) > 1) continue;
             if ((attackedSquare > 63) || (attackedSquare < 0)) continue;
             while(!board.hasPieceAt(attackedSquare, board.sideToMove)){
 
                 Move move = addMove(moves, board, i, attackedSquare);
                 if (board.showQueenMoves){
-                    if (move.isCapture){
+                    if (move.isCapture()){
                         board.targetFromCarpture.push_back(attackedSquare);
                     }else{
                         board.legalMove.push_back(attackedSquare);
                     }
                 }
 
-                if(move.isCapture)break;
+                if(move.isCapture())break;
                 if(((attackedSquare%8)==0) || ((attackedSquare%8)==7))break;
                 attackedSquare += direction;
             }
