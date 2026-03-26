@@ -1,5 +1,6 @@
 #include "board.hpp"
 #include "move.hpp"
+#include <string.h>
 
 Board::Board(){
     sideToMove = white;
@@ -41,6 +42,17 @@ bool Board::hasPieceAt(int square){
 
 bool Board::hasPieceAt(int square, int color){
     return ((1ULL << square)&allPieces(color)) != 0;
+}
+
+int Board::getPieceAt(int square){
+    for(int i = 0; i < 12; i++){
+        if((bitboards[i] & (1ULL<<square)) != 0) return i;
+    }
+}
+
+int Board::getPieceByName(char name){
+    std::string names = "PRNBQKprnbqk";
+    return static_cast<int>(names.find(name, 0));
 }
 
 void Board::printBoard(){
@@ -105,8 +117,25 @@ void Board::printBoard(){
     std::cout << "\033[0m"; 
 }
 
-piece Board::getPieceAt(int square){
-    for(int i = 0; i < 12; i++){
-        if((bitboards[i] & (1ULL<<square)) != 0) return piece(i);
-    }
+void Board::parseFen(std::string fen){
+    memset(bitboards, 0, sizeof(bitboards));
+    int row = 7;
+    int col = 7;
+    for(char i : fen){
+        if(i == ' ')break;
+        if(i == '/'){
+            row--;
+            col = 7;
+            continue;
+        }
+        if(std::isdigit(i)){
+            col -= (int)(i - '0');
+            continue;
+        }
+        
+        int square = col + (row*8);
+        bitboards[getPieceByName(i)] |= (1ULL<<square);
+        col--;
+        
+    }std::cout << "\n";
 }

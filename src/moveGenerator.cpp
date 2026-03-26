@@ -132,12 +132,15 @@ void generateSlidingnMoves(std::vector<Move>& moves, Board& board, bitboard piec
         if(((1ULL<<i)&pieces) == 0) continue;
         
         for(int direction : directions){
-            int attackedSquare = i+direction;
-            if(std::abs(getSquareCol(i)-(attackedSquare%8)) > 1) continue;
-            if ((attackedSquare > 63) || (attackedSquare < 0)) continue;
-            while(!board.hasPieceAt(attackedSquare, board.sideToMove)){
+            int currentSquare = i;
+            while(true){
+                int attackedSquare = currentSquare + direction;
+                if ((attackedSquare > 63) || (attackedSquare < 0)) break;
+                if (std::abs(getSquareCol(currentSquare) - getSquareCol(attackedSquare)) > 2) break;
+                if(board.hasPieceAt(attackedSquare, board.sideToMove)) break;
 
                 Move move = addMove(moves, board, i, attackedSquare);
+                
                 if (board.showQueenMoves){
                     if (move.isCapture()){
                         board.targetFromCarpture.push_back(attackedSquare);
@@ -146,9 +149,8 @@ void generateSlidingnMoves(std::vector<Move>& moves, Board& board, bitboard piec
                     }
                 }
 
-                if(move.isCapture())break;
-                if(((attackedSquare%8)==0) || ((attackedSquare%8)==7))break;
-                attackedSquare += direction;
+                if(move.isCapture()) break;
+                currentSquare = attackedSquare; 
             }
         }
     }

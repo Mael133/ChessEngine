@@ -10,12 +10,12 @@ int main(){
     //board.sideToMove = black;
 
     
-    board.showQueenMoves = true;
-    board.showKnightMoves = true;
-    board.showPawnMoves = true;
-    board.showKingMoves = true;
-    board.showBishopMoves = true;
-    board.showRookMoves = true;
+    //board.showQueenMoves = true;
+    //board.showKnightMoves = true;
+    //board.showPawnMoves = true;
+    //board.showKingMoves = true;
+    //board.showBishopMoves = true;
+    //board.showRookMoves = true;
     
 
     /*
@@ -32,8 +32,12 @@ int main(){
     board.bitboards[wb] = 0x200;
     board.bitboards[wk] = 0x2;
     */
+    
+    board.parseFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R ");
 
     generateMoves(moves, board);
+
+    std::cout << moves.size() << std::endl;
 
     board.printBoard();
     

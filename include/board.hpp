@@ -29,7 +29,11 @@ struct Board{
 
     bool hasPieceAt(int square, int color);
 
-    piece getPieceAt(int square);
+    int getPieceAt(int square);
+
+    int getPieceByName(char name);
 
     void printBoard();
+
+    void parseFen(std::string fen);
 };
