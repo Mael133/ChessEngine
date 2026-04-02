@@ -20,49 +20,51 @@ void generatePawnMoves(std::vector<Move>& moves, Board& board){
     bitboard pawns = board.bitboards[bp];
     int direction = black;
     int oponnent = white;
+    bitboard possiblePushes        = (pawns >> 8) & ~board.allPieces();             
+    bitboard possibleDoublePushes  = (possiblePushes >> 8) & ~board.allPieces() & 0xff00000000ULL;
+    bitboard possibleRightCaptures = ((pawns & 0x7f7f7f7f7f7f7f7fULL) >> 7) & board.allPieces(oponnent);
+    bitboard possibleLeftCaptures  = ((pawns & 0xfefefefefefefefeULL) >> 9) & board.allPieces(oponnent);
 
     if(board.sideToMove == white){
         pawns = board.bitboards[wp];
         direction = white;
         oponnent = black;
+        possiblePushes        = (pawns << 8) & ~board.allPieces();             
+        possibleDoublePushes  = (possiblePushes << 8) & ~board.allPieces() & 0xff000000ULL;
+        possibleRightCaptures = ((pawns & 0xfefefefefefefefeULL) << 7) & board.allPieces(oponnent);
+        possibleLeftCaptures  = ((pawns & 0x7f7f7f7f7f7f7f7fULL) << 9) & board.allPieces(oponnent);
     }
 
-    for(int i = 8; i < 56; i++){
-        if(((1ULL<<i)&pawns) == 0) continue;
+    while (possiblePushes) { //push
+        int targetSquare = __builtin_ctzll(possiblePushes);
+        int startSquare = targetSquare - 8*direction;
+        addMove(moves, board, startSquare, targetSquare);
+        if(board.showPawnMoves) board.legalMove.push_back(targetSquare);
+        possiblePushes &= (possiblePushes - 1);
+    }
 
-        if(!board.hasPieceAt(i+(8*direction))){//push
-            Move move = addMove(moves, board, i, i+(8*direction));
-            if (board.showPawnMoves) board.legalMove.push_back(move.to());
-        }//push
+    while (possibleDoublePushes) { //double push
+        int targetSquare = __builtin_ctzll(possibleDoublePushes);
+        int startSquare = targetSquare - 16*direction;
+        addMove(moves, board, startSquare, targetSquare);
+        if(board.showPawnMoves) board.legalMove.push_back(targetSquare);
+        possibleDoublePushes &= (possibleDoublePushes - 1);
+    }
 
-        if(((i>7)&&(i<16)&&(direction==1)) || ((i>47)&&(i<56)&&(direction==-1))){//double push
-            if(!board.hasPieceAt(i+(16*direction)) && !board.hasPieceAt(i+(8*direction))){
-                Move move = addMove(moves, board, i, i+(16*direction));
-                if (board.showPawnMoves) board.legalMove.push_back(move.to());
-            } 
-        }//double push
+    while (possibleRightCaptures) { //right captures
+        int targetSquare = __builtin_ctzll(possibleRightCaptures);
+        int startSquare = targetSquare - 16*direction;
+        addMove(moves, board, startSquare, targetSquare);
+        if(board.showPawnMoves) board.targetFromCarpture.push_back(targetSquare);
+        possibleRightCaptures &= (possibleRightCaptures - 1);
+    }
 
-        if (((board.sideToMove == white) && (getSquareCol(i) != 0)) ||
-            ((board.sideToMove == black) && (getSquareCol(i) != 7))){//right capture
-            if(board.hasPieceAt(i+(7*direction), oponnent)){
-                Move move = addMove(moves, board, i, i+(7*direction));
-                if (board.showPawnMoves){
-                    board.legalMove.push_back(move.to());
-                    board.targetFromCarpture.push_back(move.to());
-                }
-            }
-        }//right capture
-
-        if (((board.sideToMove == white) && (getSquareCol(i) != 7)) ||
-            ((board.sideToMove == black) && (getSquareCol(i) != 0))){//left capture
-            if(board.hasPieceAt(i+(9*direction), oponnent)){
-                Move move = addMove(moves, board, i, i+(9*direction));
-                if (board.showPawnMoves){
-                    board.legalMove.push_back(move.to());
-                    board.targetFromCarpture.push_back(move.to());
-                }
-            }
-        }//left capture
+    while (possibleLeftCaptures) { //left captures
+        int targetSquare = __builtin_ctzll(possibleLeftCaptures);
+        int startSquare = targetSquare - 16*direction;
+        addMove(moves, board, startSquare, targetSquare);
+        if(board.showPawnMoves) board.targetFromCarpture.push_back(targetSquare);
+        possibleLeftCaptures &= (possibleLeftCaptures - 1);
     }
 }
 
