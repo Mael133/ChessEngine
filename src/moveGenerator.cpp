@@ -68,7 +68,6 @@ void generatePawnMoves(std::vector<Move>& moves, Board& board){
     }
 }
 
-
 void generateKnightMoves(std::vector<Move>& moves, Board& board){
     bitboard knights = board.bitboards[bn];
     int oponnent = white;
@@ -78,24 +77,28 @@ void generateKnightMoves(std::vector<Move>& moves, Board& board){
         oponnent = black;
     }
 
-    int attacks[][2] = {{2, 1}, {2, -1}, {1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {-2, 1}, {-2, -1}};
-    int row = 0; int col = 1;
+    int attacks[] = {17, 15, 10, 6, 6, 10, 15, 17};
+    bitboard possibleAtacks;
+    int direction;
+    for (int i = 0; i < 8; i++){
+        if(i>3) {
+            possibleAtacks = (knights>>attacks[i]) & ~board.allPieces(board.sideToMove);
+            direction = -1;
+        }
+        else {
+            possibleAtacks = (knights<<attacks[i]) & ~board.allPieces(board.sideToMove);
+            direction = 1;
+        }
+        while (possibleAtacks) {
+            int targetSquare = __builtin_ctzll(possibleAtacks);
+            int startSquare = targetSquare - attacks[i]*direction;
 
-    for(int i = 0; i < 64; i ++){
-        if(((1ULL<<i)&knights) == 0) continue;
-
-        for(int * attack : attacks){
-            if(((attack[col] + getSquareCol(i)) > 7) || ((attack[col] + getSquareCol(i)) < 0)) continue;
-
-            int attackedSquare = i+(attack[col]+(attack[row]*8));
-            if ((attackedSquare > 63) || (attackedSquare < 0)) continue;
-            if (board.hasPieceAt(attackedSquare, board.sideToMove)) continue;
-
-            Move move = addMove(moves, board, i, attackedSquare);
-
-            if (!board.showKnightMoves) continue;
-            if (move.isCapture()) board.targetFromCarpture.push_back(attackedSquare);
-            board.legalMove.push_back(attackedSquare);
+            if (std::abs(getSquareCol(targetSquare) - getSquareCol(startSquare)) <= 2){
+                addMove(moves, board, startSquare, targetSquare);
+                if(board.showKnightMoves) board.targetFromCarpture.push_back(targetSquare);
+            }
+            
+            possibleAtacks &= (possibleAtacks - 1);
         }
     }
 }
