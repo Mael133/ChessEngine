@@ -2,23 +2,8 @@
 #include "move.hpp"
 #include <string.h>
 
-Board::Board(){
-    sideToMove = white;
-
-    //startig position
-    bitboards[bp] = 0xff000000000000;
-    bitboards[br] = 0x8100000000000000;
-    bitboards[bn] = 0x4200000000000000;
-    bitboards[bb] = 0x2400000000000000;
-    bitboards[bk] = 0x800000000000000;
-    bitboards[bq] = 0x1000000000000000;
-
-    bitboards[wp] = 0xff00;
-    bitboards[wr] = 0x81;
-    bitboards[wn] = 0x42;
-    bitboards[wb] = 0x24;
-    bitboards[wk] = 0x8;
-    bitboards[wq] = 0x10;
+Board::Board(std::string fen){
+    parseFen(fen);
 };
 
 bitboard Board::allPieces(){
@@ -62,15 +47,15 @@ void Board::printBoard(){
     std::string background;
     
     //---lichess colors
-    //std::string whitebg   = "\033[48;2;200;177;141m";
-    //std::string darkbg    = "\033[48;2;141;96;59m";
+    std::string whitebg   = "\033[48;2;200;177;141m";
+    std::string darkbg    = "\033[48;2;141;96;59m";
 
     //---green
     //std::string green     = "\033[48;2;9;140;63m";
     //std::string darkGreen = "\033[48;2;9;100;63m";
 
-    std::string lightbg   = "\033[48;2;118;124;202m";
-    std::string darkbg    = "\033[48;2;53;58;128m";
+    //std::string whitebg   = "\033[48;2;118;124;202m";
+    //std::string darkbg    = "\033[48;2;53;58;128m";
     std::string whitefg   = "\033[38;2;240;240;240m";
     std::string blackfg   = "\033[38;2;0;0;0m";   
 
@@ -86,7 +71,7 @@ void Board::printBoard(){
     std::cout << "\n";
     for(int j = 63; j > -1; j--){
         empty = true;
-        if((j+(j/8))%2==0) background = lightbg;
+        if((j+(j/8))%2==0) background = whitebg;
         else background = darkbg;
         
         for(int square : legalMove){
@@ -121,7 +106,9 @@ void Board::parseFen(std::string fen){
     memset(bitboards, 0, sizeof(bitboards));
     int row = 7;
     int col = 7;
+    int index = 0;
     for(char i : fen){
+        index++;
         if(i == ' ')break;
         if(i == '/'){
             row--;
@@ -134,8 +121,35 @@ void Board::parseFen(std::string fen){
         }
         
         int square = col + (row*8);
-        bitboards[getPieceByName(i)] |= (1ULL<<square);
+        int piece = getPieceByName(i);
+        bitboards[piece] |= (1ULL<<square);
+        if(piece == wk) whiteKingSquare = col + (row*8);
+        if(piece == bk) blackKingSquare = col + (row*8);
+
         col--;
         
-    }std::cout << "\n";
+
+    }
+    if(fen[index] == 'w') sideToMove = white;
+    else sideToMove = black;
+    index += 2;
+    if (fen[index] == '-'){
+        index += 2;
+    }else{
+        for(int i = 0; i < 4; i ++){
+            if(i!=0)index++;
+            if(fen[index] == 'K'){
+                wKingSideCastle = true;
+            }else if(fen[index] == 'Q'){
+                wQueenSideCastle = true;
+            }else if(fen[index] == 'k'){
+                bKingSideCastle = true;
+            }else if(fen[index] == 'q'){
+                bQueenSideCastle = true;
+            }else{
+                break;   
+            }
+        }
+        index++;
+    }
 }

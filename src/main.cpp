@@ -4,10 +4,7 @@
 int main(){
 
     std::vector<Move> moves;
-    Board board;
-
-
-    //board.sideToMove = black;
+    Board board("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ");
 
     //board.showQueenMoves = true;
     board.showKnightMoves = true;
@@ -15,15 +12,19 @@ int main(){
     //board.showKingMoves = true;
     //board.showBishopMoves = true;
     //board.showRookMoves = true;
-    
-    //board.parseFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R ");
-    board.parseFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ");
 
     generateMoves(moves, board);
 
     std::cout << moves.size() << std::endl;
 
     board.printBoard();
+
+    std::cout << "\n" << board.whiteKingSquare << " " << board.blackKingSquare << "\n";
+
+    std::cout << "White K: " << board.wKingSideCastle << "\n"; 
+    std::cout << "White Q: " << board.wQueenSideCastle << "\n"; 
+    std::cout << "Black K: " << board.bKingSideCastle << "\n"; 
+    std::cout << "Black Q: " << board.bQueenSideCastle << "\n"; 
     
     return 0;
 }

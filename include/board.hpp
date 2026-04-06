@@ -7,8 +7,16 @@
 
 
 struct Board{
-    bitboard bitboards[12];
-    int sideToMove;
+    bitboard bitboards[12] = {0x0ULL};
+    int sideToMove = white;
+
+    int whiteKingSquare;
+    int blackKingSquare;
+
+    bool wKingSideCastle = false;
+    bool wQueenSideCastle = false;
+    bool bKingSideCastle = false;
+    bool bQueenSideCastle = false;
     
     bool showPawnMoves = false;
     bool showRookMoves = false;
@@ -20,7 +28,7 @@ struct Board{
     std::vector<int> targetFromCarpture;
     std::vector<int> legalMove;
 
-    Board();
+    Board(std::string fen);
 
     bitboard allPieces();
     bitboard allPieces(int color);
